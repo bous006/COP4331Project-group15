@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ShareActivity">
+
+    <item
+        android:id="@+id/action_insert_dummy_admin"
+        android:title="@string/action_insert_dummy_admin"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_insert_dummy_user"
+        android:title="@string/action_insert_dummy_user"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_insert_dummy_viewer"
+        android:title="@string/action_insert_dummy_viewer"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_delete_all_users"
+        android:title="@string/action_delete_all_users"
+        app:showAsAction="never" />
+
+</menu>

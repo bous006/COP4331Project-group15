@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- These are the options displayed in the gender drop-down Spinner -->
+    <string-array name="array_type_options">
+        <item>@string/type_general</item>
+        <item>@string/type_theft</item>
+        <item>@string/type_assault</item>
+        <item>@string/type_vandalism</item>
+    </string-array>
+
+    <string-array name="array_user_type_options">
+        <item>@string/type_admin</item>
+        <item>@string/type_user</item>
+        <item>@string/type_viewer</item>
+    </string-array>
+</resources>
