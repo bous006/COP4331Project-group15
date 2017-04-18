@@ -44,6 +44,18 @@ public class ViewReportActivity extends AppCompatActivity implements
 
     private TextView mTypeText;
 
+    private static boolean verify;
+
+    private static String reportName;
+
+    private static String reportDesc;
+
+    private static String reportDate;
+
+    private static String reportType;
+
+    private static Uri cachedReportUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +65,7 @@ public class ViewReportActivity extends AppCompatActivity implements
         // in order to figure out if we're creating a new report or editing an existing one.
         Intent intent = getIntent();
         mCurrentReportUri = intent.getData();
+        cachedReportUri = mCurrentReportUri;
 
         // Find all relevant views that we will need to read user input from
         mNameText = (TextView) findViewById(R.id.view_report_name);
@@ -60,9 +73,19 @@ public class ViewReportActivity extends AppCompatActivity implements
         mDateText = (TextView) findViewById(R.id.view_report_date);
         mTypeText = (TextView) findViewById(R.id.view_report_type);
 
-        // Initialize a loader to read the report data from the database
-        // and display the current values
-        getLoaderManager().initLoader(EXISTING_REPORT_LOADER, null, this);
+        if (!verify){
+            // Initialize a loader to read the report data from the database
+            // and display the current values
+            getLoaderManager().initLoader(EXISTING_REPORT_LOADER, null, this);
+            verify = true;
+        } else {
+            mNameText.setText(reportName);
+            mNameText.setPaintFlags(mNameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            mDescriptionText.setText(reportDesc);
+            mDateText.setText(reportDate);
+            mTypeText.setText(reportType);
+        }
+
     }
 
     @Override
@@ -116,21 +139,39 @@ public class ViewReportActivity extends AppCompatActivity implements
             // Respond to a click on the "Save" menu option
             case R.id.action_edit:
                 // Edit Report
-                editReport();
-                // Exit activity
-                finish();
-                return true;
+                if (UserDataHolder.getCurrentUserAccess() == 0) {
+                    Toast.makeText(this, getString(R.string.editor_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                } else {
+                    editReport();
+                    // Exit activity
+                    finish();
+                    return true;
+                }
             // Respond to a click on the "Share" menu option
             case R.id.action_share:
                 // Edit Report
-                shareReport();
-                // Exit activity
-                return true;
+                if (UserDataHolder.getCurrentUserAccess() == 0) {
+                    Toast.makeText(this, getString(R.string.share_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                } else {
+                    shareReport();
+                    // Exit activity
+                    return true;
+                }
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
-                // Pop up confirmation dialog for deletion
-                showDeleteConfirmationDialog();
-                return true;
+                if (UserDataHolder.getCurrentUserAccess() == 0) {
+                    Toast.makeText(this, getString(R.string.delete_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                } else {
+                    // Pop up confirmation dialog for deletion
+                    showDeleteConfirmationDialog();
+                    return true;
+                }
          }
          return super.onOptionsItemSelected(item);
     }
@@ -192,25 +233,31 @@ public class ViewReportActivity extends AppCompatActivity implements
             // Update the views on the screen with the values from the database
             mNameText.setText(name);
             mNameText.setPaintFlags(mNameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            reportName = name;
             int month = calendar.get(calendar.MONTH)+1;
             int day = calendar.get(calendar.DAY_OF_MONTH);
             int year = calendar.get(calendar.YEAR);
             showDate(year, month, day);
             //showDate(1970, 0, 0);
             mDescriptionText.setText(description);
+            reportDesc = description;
 
             switch (type) {
                 case ReportEntry.TYPE_THEFT:
                     mTypeText.setText(R.string.type_theft);
+                    reportType = "Theft";
                     break;
                 case ReportEntry.TYPE_ASSAULT:
                     mTypeText.setText(R.string.type_assault);
+                    reportType = "Assault";
                     break;
                 case ReportEntry.TYPE_VANDALISM:
                     mTypeText.setText(R.string.type_vandalism);
+                    reportType = "Vandalism";
                     break;
                 default:
                     mTypeText.setText(R.string.type_general);
+                    reportType = "General";
                     break;
             }
         }
@@ -260,11 +307,11 @@ public class ViewReportActivity extends AppCompatActivity implements
      */
     private void deleteReport() {
         // Only perform the delete if this is an existing report.
-        if (mCurrentReportUri != null) {
+        if (cachedReportUri != null) {
             // Call the ContentResolver to delete the report at the given content URI.
             // Pass in null for the selection and selection args because the mCurrentReportUri
             // content URI already identifies the report that we want.
-            int rowsDeleted = getContentResolver().delete(mCurrentReportUri, null, null);
+            int rowsDeleted = getContentResolver().delete(cachedReportUri, null, null);
 
             // Show a toast message depending on whether or not the delete was successful.
             if (rowsDeleted == 0) {
@@ -283,7 +330,8 @@ public class ViewReportActivity extends AppCompatActivity implements
     }
 
     private void showDate(int year, int month, int day) {
-        mDateText.setText(new StringBuilder().append(month).append("/")
-                .append(day).append("/").append(year));
+        reportDate = new StringBuilder().append(month).append("/")
+                .append(day).append("/").append(year).toString();
+        mDateText.setText(reportDate);
     }
 }

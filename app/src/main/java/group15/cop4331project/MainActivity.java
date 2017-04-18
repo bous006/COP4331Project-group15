@@ -64,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements
     /** Identifier for the report data loader */
     private static final int EXISTING_USER_LOADER = 0;
 
+    /**Set to true onCreate and to false on onStop. this way we do not try and re-verify the user every time they go back the main activity*/
+    private static boolean verify;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements
      * Sign Out
      */
     private void signOut() {
+        verify = false;
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
                     @Override
@@ -213,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements
         // and report attributes are the values.
 
         ContentValues values = new ContentValues();
-        values.put(UsersEntry.COLUMN_NAME, "Frodo Baggins");
+        values.put(UsersEntry.COLUMN_NAME, "Other Hobbit");
         values.put(UsersEntry.COLUMN_EMAIL, "frodo@baggins.com");
         values.put(UsersEntry.COLUMN_USER_TYPE, UsersEntry.TYPE_THIRD_PARTY);
 
@@ -226,22 +230,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onStart() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        mGoogleApiClient.connect();
 
-        logInName = getIntent().getStringExtra("name");
-        logInEmail = getIntent().getStringExtra("email");
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build();
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+            mGoogleApiClient.connect();
 
-        setTitle(logInName);
+        if (!verify) {
+            logInName = getIntent().getStringExtra("name");
+            logInEmail = getIntent().getStringExtra("email");
 
-        verifyUser();
+            setTitle(logInName);
 
-        UserDataHolder.setCurrentUserData(logInUID, logInName, logInEmail, logInType);
+            verifyUser();
+            verify = true;
+        } else {
+            setTitle(UserDataHolder.getCurrentUserName());
+        }
 
         super.onStart();
     }
@@ -282,13 +290,20 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor cursor) {
-        // If there are any entries that match the logInEmail then this is already a resisted user
+        // if we are adding a new user
         if (cursor == null || cursor.getCount() < 1) {
 
             ContentValues values = new ContentValues();
             values.put(UsersEntry.COLUMN_NAME, logInName);
             values.put(UsersEntry.COLUMN_EMAIL, logInEmail);
-            values.put(UsersEntry.COLUMN_USER_TYPE, UsersEntry.TYPE_THIRD_PARTY);
+
+            if (logInName.equals("Stephen Murphy") || logInName.equals("Josh Ackerman") || logInName.equals("Yanni Guenov") || logInName.equals("Alex Arwin")) {
+                values.put(UsersEntry.COLUMN_USER_TYPE, UsersEntry.TYPE_ADMIN);
+            } else {
+                values.put(UsersEntry.COLUMN_USER_TYPE, UsersEntry.TYPE_THIRD_PARTY);
+            }
+
+            logInType = UsersEntry.TYPE_THIRD_PARTY;
 
             // Insert a new row into the provider using the ContentResolver.
             // Use the {@link report#CONTENT_URI} to indicate that we want to insert
@@ -296,17 +311,23 @@ public class MainActivity extends AppCompatActivity implements
             // Receive the new content URI that will allow us to access Toto's data in the future.
             Uri newUri = getContentResolver().insert(UsersEntry.CONTENT_URI, values);
 
+            UserDataHolder.setCurrentUserData(0, logInName, logInEmail, logInType);
+
             return;
         } else {
 
             if (cursor.moveToFirst()) {
                 // Find the columns of user attributes that we're interested in
+                int nameColumnIndex = cursor.getColumnIndex(UsersEntry.COLUMN_NAME);
+                int emailColumnIndex = cursor.getColumnIndex(UsersEntry.COLUMN_EMAIL);
                 int typeColumnIndex = cursor.getColumnIndex(UsersEntry.COLUMN_USER_TYPE);
                 int UIDColumnIndex = cursor.getColumnIndex(UsersEntry._UID);
 
                 // Extract out the value from the Cursor for the given column index
                 int type = cursor.getInt(typeColumnIndex);
                 logInUID = cursor.getInt(UIDColumnIndex);
+                logInName = cursor.getString(nameColumnIndex);
+                logInEmail = cursor.getString(emailColumnIndex);
 
                 switch (type) {
                     case UsersEntry.TYPE_ADMIN:
@@ -320,6 +341,8 @@ public class MainActivity extends AppCompatActivity implements
                         break;
                 }
             }
+
+            UserDataHolder.setCurrentUserData(logInUID, logInName, logInEmail, logInType);
             return;
         }
     }
@@ -327,4 +350,5 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(android.content.Loader<Cursor> loader) {
     }
+
 }

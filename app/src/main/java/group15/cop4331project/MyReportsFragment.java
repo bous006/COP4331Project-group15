@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import group15.cop4331project.data.ReportContract.ReportEntry;
 
 public class MyReportsFragment extends android.support.v4.app.Fragment implements
@@ -48,7 +50,13 @@ public class MyReportsFragment extends android.support.v4.app.Fragment implement
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), EditReportActivity.class);
-                startActivity(intent);
+
+                if (UserDataHolder.getCurrentUserAccess() == 0) {
+                    Toast.makeText(getActivity(), getString(R.string.create_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    startActivity(intent);
+                }
             }
         });
 
@@ -78,7 +86,13 @@ public class MyReportsFragment extends android.support.v4.app.Fragment implement
 
         // Kick off the loader
         getLoaderManager().initLoader(REPORT_LOADER, null, this);
-        //getActivity().getSupportLoaderManager().initLoader(REPORT_LOADER, null, this);
+
+        if (UserDataHolder.getCurrentUserAccess() == 0) {
+            fab.setVisibility(View.INVISIBLE);
+        } else {
+            fab.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override

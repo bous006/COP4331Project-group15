@@ -117,6 +117,14 @@
     <!-- Toast message in editor when current pet has failed to be deleted [CHAR LIMIT=NONE] -->
     <string name="editor_delete_report_failed">Error with deleting report</string>
 
+    <string name="editor_access_denied">Report Edit Access Denied</string>
+
+    <string name="share_access_denied">Report Share Access Denied</string>
+
+    <string name="delete_access_denied">Report Delete Access Denied</string>
+
+    <string name="create_access_denied">Report Create Access Denied</string>
+
     <string name="viewer_no_name">Name not found</string>
 
     <string name="viewer_activity_title">View Report</string>
