@@ -76,7 +76,7 @@ public class ReportContract {
         /**
          * Location of the report.
          *
-         * Type: LATLONG
+         * Type: TEXT
          */
         public final static String COLUMN_REPORT_LOCATION = "location";
 
@@ -85,7 +85,7 @@ public class ReportContract {
          *
          * Type: INTEGER
          */
-        public final static String COLUMN_REPORTER_ID = "reporter_ID";
+        public final static String COLUMN_REPORTER_NAME = "reporter_name";
 
         /**
          * Possible values for the types of reports.

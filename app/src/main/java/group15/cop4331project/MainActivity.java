@@ -86,6 +86,27 @@ public class MainActivity extends AppCompatActivity implements
 
         // Connect the tab layout with the view pager. This will
         tabLayout.setupWithViewPager(viewPager);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        mGoogleApiClient.connect();
+
+        if (!verify) {
+            logInName = getIntent().getStringExtra("name");
+            logInEmail = getIntent().getStringExtra("email");
+
+            UserDataHolder.setCurrentUserName(logInName);
+            setTitle(logInName);
+
+            verifyUser();
+            verify = true;
+        } else {
+            setTitle(UserDataHolder.getCurrentUserName());
+        }
     }
     /**
      * This is really just for us so that we can clear the db easily
@@ -172,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements
         values.put(ReportEntry.COLUMN_REPORT_TYPE, ReportEntry.TYPE_ASSAULT);
         values.put(ReportEntry.COLUMN_REPORT_DATE, date);
         values.put(ReportEntry.COLUMN_REPORT_DESCRIPTION, "There was this kid and he pooped on a table.");
+        values.put(ReportEntry.COLUMN_REPORTER_NAME, "Gandalf");
+        values.put(ReportEntry.COLUMN_REPORT_LOCATION, "UCF");
 
         // Insert a new row into the provider using the ContentResolver.
         // Use the {@link report#CONTENT_URI} to indicate that we want to insert
@@ -231,13 +254,13 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
 
-            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .build();
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                    .build();
-            mGoogleApiClient.connect();
+        /*GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        mGoogleApiClient.connect();
 
         if (!verify) {
             logInName = getIntent().getStringExtra("name");
@@ -249,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements
             verify = true;
         } else {
             setTitle(UserDataHolder.getCurrentUserName());
-        }
+        }*/
 
         super.onStart();
     }

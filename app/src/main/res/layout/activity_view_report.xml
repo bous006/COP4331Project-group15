@@ -8,6 +8,17 @@
     android:padding="@dimen/activity_margin"
     tools:context=".EditReportActivity">
 
+    <!-- Reporter Name -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/view_reporter_name"
+        android:text="Author"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        style="@style/CategoryStyle" />
+
     <!-- Report Name -->
     <TextView
         android:layout_width="wrap_content"
@@ -31,6 +42,14 @@
     <TextView
         android:id="@+id/view_report_date"
         android:text="@string/hint_report_name"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        style="@style/CategoryStyle" />
+
+    <!-- Report Location -->
+    <TextView
+        android:id="@+id/view_report_location"
+        android:text="@string/hint_report_location"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         style="@style/CategoryStyle" />

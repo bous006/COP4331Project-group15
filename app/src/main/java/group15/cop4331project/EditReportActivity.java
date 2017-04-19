@@ -58,12 +58,19 @@ public class EditReportActivity extends AppCompatActivity implements
     /** EditText field to enter the report's description */
     private EditText mDescriptionEditText;
 
+    private EditText mLocationEditText;
+
     /**Use a spinner for report type*/
     private Spinner mTypeSpinner;
     private int mType = ReportEntry.TYPE_GENERAL;
 
+    /** TextView field to see the reporter's name*/
+    private TextView mReporterName;
+    private  String reporterString;
+
     /**Report Date*/
     private long mDate;
+    private long currentDate;
 
     /** Boolean flag that keeps track of whether the report has been edited (true) or not (false) */
     private boolean mReportHasChanged = false;
@@ -97,12 +104,21 @@ public class EditReportActivity extends AppCompatActivity implements
         Intent intent = getIntent();
         mCurrentReportUri = intent.getData();
 
+        // Find all relevant views that we will need to read user input from
+        mReporterName = (TextView) findViewById(R.id.edit_reporter_name);
+        mNameEditText = (EditText) findViewById(R.id.edit_report_name);
+        mDescriptionEditText = (EditText) findViewById(R.id.edit_report_description);
+        mTypeSpinner = (Spinner) findViewById(R.id.spinner_type);
+        mDateView = (TextView) findViewById(R.id.date_view);
+        mLocationEditText = (EditText) findViewById(R.id.edit_report_location);
+
         // If the intent DOES NOT contain a report content URI, then we know that we are
         // creating a new report.
         if (mCurrentReportUri == null) {
             // This is a new report, so change the app bar to say "Add a report"
             setTitle(getString(R.string.editor_activity_title_new_report));
-
+            mReporterName.setText(UserDataHolder.getCurrentUserName());
+            reporterString = UserDataHolder.getCurrentUserName();
             // Invalidate the options menu, so the "Delete" menu option can be hidden.
             // (It doesn't make sense to delete a report that hasn't been created yet.)
             invalidateOptionsMenu();
@@ -115,12 +131,6 @@ public class EditReportActivity extends AppCompatActivity implements
             getLoaderManager().initLoader(EXISTING_REPORT_LOADER, null, this);
         }
 
-        // Find all relevant views that we will need to read user input from
-        mNameEditText = (EditText) findViewById(R.id.edit_report_name);
-        mDescriptionEditText = (EditText) findViewById(R.id.edit_report_description);
-        mTypeSpinner = (Spinner) findViewById(R.id.spinner_type);
-        mDateView = (TextView) findViewById(R.id.date_view);
-
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
         // or not, if the user tries to leave the editor without saving.
@@ -128,7 +138,7 @@ public class EditReportActivity extends AppCompatActivity implements
         mDescriptionEditText.setOnTouchListener(mTouchListener);
         mTypeSpinner.setOnTouchListener(mTouchListener);
         mDateView.setOnTouchListener(mTouchListener);
-
+        mLocationEditText.setOnTouchListener(mTouchListener);
 
         setupSpinner();
     }
@@ -181,7 +191,7 @@ public class EditReportActivity extends AppCompatActivity implements
         // Use trim to eliminate leading or trailing white space
         String nameString = mNameEditText.getText().toString().trim();
         String descriptionString = mDescriptionEditText.getText().toString().trim();
-        //Long dateLong = mDateView.get
+        String locationString = mLocationEditText.getText().toString().trim();
 
         // Check if this is supposed to be a new report
         // and check if all the fields in the editor are blank
@@ -193,13 +203,26 @@ public class EditReportActivity extends AppCompatActivity implements
             return;
         }
 
+        if (mCurrentReportUri != null) {
+            reporterString = UserDataHolder.getCurrentUserName();
+        }
+
         // Create a ContentValues object where column names are the keys,
         // and report attributes from the editor are the values.
         ContentValues values = new ContentValues();
         values.put(ReportEntry.COLUMN_REPORT_NAME, nameString);
         values.put(ReportEntry.COLUMN_REPORT_DESCRIPTION, descriptionString);
         values.put(ReportEntry.COLUMN_REPORT_TYPE, mType);
-        values.put(ReportEntry.COLUMN_REPORT_DATE, mDate);
+        if (mDate == 0) {
+            values.put(ReportEntry.COLUMN_REPORT_DATE, currentDate
+            );
+        } else {
+            values.put(ReportEntry.COLUMN_REPORT_DATE, mDate);
+        }
+        if (mCurrentReportUri == null) {
+            values.put(ReportEntry.COLUMN_REPORTER_NAME, reporterString);
+        }
+        values.put(ReportEntry.COLUMN_REPORT_LOCATION, locationString);
 
         // Determine if this is a new or existing report by checking if mCurrentReportUri is null or not
         if (mCurrentReportUri == null) {
@@ -339,7 +362,9 @@ public class EditReportActivity extends AppCompatActivity implements
                 ReportEntry.COLUMN_REPORT_NAME,
                 ReportEntry.COLUMN_REPORT_TYPE,
                 ReportEntry.COLUMN_REPORT_DATE,
-                ReportEntry.COLUMN_REPORT_DESCRIPTION};
+                ReportEntry.COLUMN_REPORT_DESCRIPTION,
+                ReportEntry.COLUMN_REPORTER_NAME,
+                ReportEntry.COLUMN_REPORT_LOCATION};
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
@@ -365,10 +390,14 @@ public class EditReportActivity extends AppCompatActivity implements
             int typeColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_TYPE);
             int dateColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DATE);
             int descriptionColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DESCRIPTION);
+            int reporterNameColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORTER_NAME);
+            int locationColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_LOCATION);
 
             // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
             String description = cursor.getString(descriptionColumnIndex);
+            String reporterName = cursor.getString(reporterNameColumnIndex);
+            String location = cursor.getString(locationColumnIndex);
             int type = cursor.getInt(typeColumnIndex);
             long date = cursor.getLong(dateColumnIndex);
             calendar = Calendar.getInstance();
@@ -377,11 +406,15 @@ public class EditReportActivity extends AppCompatActivity implements
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
+            mReporterName.setText(reporterName);
+            reporterString = reporterName;
+            mLocationEditText.setText(location);
             int month = calendar.get(calendar.MONTH)+1;
             int day = calendar.get(calendar.DAY_OF_MONTH);
             int year = calendar.get(calendar.YEAR);
             showDate(year, month, day);
             //showDate(1970, 0, 0);
+            currentDate = date;
             mDescriptionEditText.setText(description);
 
             switch (type) {
@@ -405,7 +438,9 @@ public class EditReportActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Cursor> loader) {
         // If the loader is invalidated, clear out all the data from the input fields.
         mNameEditText.setText("");
+        mReporterName.setText("");
         mDescriptionEditText.setText("");
+        mLocationEditText.setText("");
         showDate(1970, 0, 0);
         mTypeSpinner.setSelection(0);
     }

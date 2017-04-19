@@ -171,13 +171,19 @@ public class ReportProvider extends ContentProvider {
             throw new IllegalArgumentException("Report requires a name");
         }
 
-        // Check that the gender is valid
+        //Check that the reporter name is not null
+        String reporterName = values.getAsString(ReportEntry.COLUMN_REPORTER_NAME);
+        if (reporterName == null) {
+            throw new IllegalArgumentException("Report requires a reporter name");
+        }
+
+        // Check that the type is valid
         Integer type = values.getAsInteger(ReportEntry.COLUMN_REPORT_TYPE);
         if (type == null || !ReportEntry.isValidType(type)) {
             throw new IllegalArgumentException("Report requires valid type");
         }
 
-        // Check that the gender is valid
+        // Check that the date is valid
         Long date = values.getAsLong(ReportEntry.COLUMN_REPORT_DATE);
         if (date == null) {
             throw new IllegalArgumentException("Report requires valid type");
@@ -187,6 +193,12 @@ public class ReportProvider extends ContentProvider {
         String description = values.getAsString(ReportContract.ReportEntry.COLUMN_REPORT_DESCRIPTION);
         if (description == null) {
             throw new IllegalArgumentException("Report requires a description");
+        }
+
+        //Check that the location is not null
+        String location = values.getAsString(ReportEntry.COLUMN_REPORT_LOCATION);
+        if (location == null) {
+            throw new IllegalArgumentException("Report requires a location");
         }
 
         // Get a writeable database

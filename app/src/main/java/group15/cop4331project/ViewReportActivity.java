@@ -44,6 +44,10 @@ public class ViewReportActivity extends AppCompatActivity implements
 
     private TextView mTypeText;
 
+    private TextView mReporterName;
+
+    private TextView mLocationText;
+
     private static boolean verify;
 
     private static String reportName;
@@ -53,6 +57,10 @@ public class ViewReportActivity extends AppCompatActivity implements
     private static String reportDate;
 
     private static String reportType;
+
+    private static String reporterName;
+
+    private static String reportLocation;
 
     private static Uri cachedReportUri;
 
@@ -65,25 +73,31 @@ public class ViewReportActivity extends AppCompatActivity implements
         // in order to figure out if we're creating a new report or editing an existing one.
         Intent intent = getIntent();
         mCurrentReportUri = intent.getData();
-        cachedReportUri = mCurrentReportUri;
 
         // Find all relevant views that we will need to read user input from
         mNameText = (TextView) findViewById(R.id.view_report_name);
         mDescriptionText = (TextView) findViewById(R.id.view_report_description);
         mDateText = (TextView) findViewById(R.id.view_report_date);
         mTypeText = (TextView) findViewById(R.id.view_report_type);
+        mReporterName = (TextView) findViewById(R.id.view_reporter_name);
+        mLocationText = (TextView) findViewById(R.id.view_report_location);
 
-        if (!verify){
+        //checking if we should use the cached report or not
+        if (!verify || mCurrentReportUri != cachedReportUri){
             // Initialize a loader to read the report data from the database
             // and display the current values
             getLoaderManager().initLoader(EXISTING_REPORT_LOADER, null, this);
             verify = true;
         } else {
+            cachedReportUri = mCurrentReportUri;
+            setTitle(reportName);
             mNameText.setText(reportName);
             mNameText.setPaintFlags(mNameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             mDescriptionText.setText(reportDesc);
             mDateText.setText(reportDate);
             mTypeText.setText(reportType);
+            mReporterName.setText(reporterName);
+            mLocationText.setText(reportLocation);
         }
 
     }
@@ -143,6 +157,10 @@ public class ViewReportActivity extends AppCompatActivity implements
                     Toast.makeText(this, getString(R.string.editor_access_denied),
                             Toast.LENGTH_SHORT).show();
                     return true;
+                } else if (UserDataHolder.getCurrentUserAccess() == 1 && !UserDataHolder.getCurrentUserName().equals(reporterName)){
+                    Toast.makeText(this, getString(R.string.delete_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                    return true;
                 } else {
                     editReport();
                     // Exit activity
@@ -164,6 +182,10 @@ public class ViewReportActivity extends AppCompatActivity implements
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 if (UserDataHolder.getCurrentUserAccess() == 0) {
+                    Toast.makeText(this, getString(R.string.delete_access_denied),
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                } else if (UserDataHolder.getCurrentUserAccess() == 1 && !UserDataHolder.getCurrentUserName().equals(reporterName)){
                     Toast.makeText(this, getString(R.string.delete_access_denied),
                             Toast.LENGTH_SHORT).show();
                     return true;
@@ -194,7 +216,9 @@ public class ViewReportActivity extends AppCompatActivity implements
                 ReportEntry.COLUMN_REPORT_NAME,
                 ReportEntry.COLUMN_REPORT_TYPE,
                 ReportEntry.COLUMN_REPORT_DATE,
-                ReportEntry.COLUMN_REPORT_DESCRIPTION};
+                ReportEntry.COLUMN_REPORT_DESCRIPTION,
+                ReportEntry.COLUMN_REPORTER_NAME,
+                ReportEntry.COLUMN_REPORT_LOCATION};
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
@@ -220,10 +244,14 @@ public class ViewReportActivity extends AppCompatActivity implements
             int typeColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_TYPE);
             int dateColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DATE);
             int descriptionColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DESCRIPTION);
+            int reporterNameColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORTER_NAME);
+            int locationColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_LOCATION);
 
             // Extract out the value from the Cursor for the given column index
-            String name = cursor.getString(nameColumnIndex);
-            String description = cursor.getString(descriptionColumnIndex);
+            String name = "Title: " + cursor.getString(nameColumnIndex);
+            String description = "Description: " + cursor.getString(descriptionColumnIndex);
+            String userName = "Author: " + cursor.getString(reporterNameColumnIndex);
+            String location = "At: " + cursor.getString(locationColumnIndex);
             int type = cursor.getInt(typeColumnIndex);
             long date = cursor.getLong(dateColumnIndex);
             Calendar calendar = Calendar.getInstance();
@@ -231,33 +259,38 @@ public class ViewReportActivity extends AppCompatActivity implements
 
 
             // Update the views on the screen with the values from the database
+            setTitle(name);
             mNameText.setText(name);
             mNameText.setPaintFlags(mNameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             reportName = name;
+            mReporterName.setText(userName);
+            reporterName = userName;
             int month = calendar.get(calendar.MONTH)+1;
             int day = calendar.get(calendar.DAY_OF_MONTH);
             int year = calendar.get(calendar.YEAR);
             showDate(year, month, day);
             //showDate(1970, 0, 0);
+            mLocationText.setText(location);
+            reportLocation = location;
             mDescriptionText.setText(description);
             reportDesc = description;
 
             switch (type) {
                 case ReportEntry.TYPE_THEFT:
                     mTypeText.setText(R.string.type_theft);
-                    reportType = "Theft";
+                    reportType = "Type: Theft";
                     break;
                 case ReportEntry.TYPE_ASSAULT:
                     mTypeText.setText(R.string.type_assault);
-                    reportType = "Assault";
+                    reportType = "Type: Assault";
                     break;
                 case ReportEntry.TYPE_VANDALISM:
                     mTypeText.setText(R.string.type_vandalism);
-                    reportType = "Vandalism";
+                    reportType = "Type: Vandalism";
                     break;
                 default:
                     mTypeText.setText(R.string.type_general);
-                    reportType = "General";
+                    reportType = "Type: General";
                     break;
             }
         }
@@ -267,9 +300,11 @@ public class ViewReportActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Cursor> loader) {
         // If the loader is invalidated, clear out all the data from the input fields.
         mNameText.setText("");
+        mReporterName.setText("");
         mDescriptionText.setText("");
         showDate(1970, 0, 0);
         mTypeText.setText(R.string.type_general);
+        mLocationText.setText("");
     }
 
 
@@ -330,7 +365,7 @@ public class ViewReportActivity extends AppCompatActivity implements
     }
 
     private void showDate(int year, int month, int day) {
-        reportDate = new StringBuilder().append(month).append("/")
+        reportDate = "Date: " + new StringBuilder().append(month).append("/")
                 .append(day).append("/").append(year).toString();
         mDateText.setText(reportDate);
     }

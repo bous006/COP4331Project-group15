@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import group15.cop4331project.data.ReportContract.ReportEntry;
+import group15.cop4331project.data.UsersContract;
 
 public class MyReportsFragment extends android.support.v4.app.Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -84,15 +85,21 @@ public class MyReportsFragment extends android.support.v4.app.Fragment implement
             }
         });
 
-        // Kick off the loader
-        getLoaderManager().initLoader(REPORT_LOADER, null, this);
 
-        if (UserDataHolder.getCurrentUserAccess() == 0) {
+
+        /*if (UserDataHolder.getCurrentUserAccess() == 0) {
             fab.setVisibility(View.INVISIBLE);
         } else {
             fab.setVisibility(View.VISIBLE);
-        }
+        }*/
 
+    }
+
+    @Override
+    public void onResume() {
+        // Kick off the loader
+        getLoaderManager().initLoader(REPORT_LOADER, null, this);
+        super.onResume();
     }
 
     @Override
@@ -102,14 +109,20 @@ public class MyReportsFragment extends android.support.v4.app.Fragment implement
                 ReportEntry._ID,
                 ReportEntry.COLUMN_REPORT_NAME,
                 ReportEntry.COLUMN_REPORT_TYPE,
-                ReportEntry.COLUMN_REPORT_DESCRIPTION};
+                ReportEntry.COLUMN_REPORT_DATE,
+                ReportEntry.COLUMN_REPORT_DESCRIPTION,
+                ReportEntry.COLUMN_REPORT_LOCATION,
+                ReportEntry.COLUMN_REPORTER_NAME};
 
+        String selection = ReportEntry.COLUMN_REPORTER_NAME + "=?";
+        String currentUser = UserDataHolder.getCurrentUserName();
+        String selectionArgs[] = {currentUser};
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(getActivity(),   // Parent activity context
                 ReportEntry.CONTENT_URI,   // Provider content URI to query
                 projection,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
+                selection,                   // No selection clause
+                selectionArgs,                   // No selection arguments
                 null);                  // Default sort order
     }
     /***/

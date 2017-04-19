@@ -24,4 +24,8 @@ public class UserDataHolder {
         UserDataHolder.currentUserEmail = email;
         UserDataHolder.currentUserAccess = access;
     }
+
+    public static void setCurrentUserName(String name) {
+        UserDataHolder.currentUserName = name;
+    }
 }

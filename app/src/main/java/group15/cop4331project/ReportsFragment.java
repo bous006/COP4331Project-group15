@@ -61,7 +61,7 @@ public class ReportsFragment extends android.support.v4.app.Fragment implements
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // Create new intent to go to {@link EditorActivity}
-                Intent intent = new Intent(getActivity(), EditReportActivity.class);
+                Intent intent = new Intent(getActivity(), ViewReportActivity.class);
 
                 Uri currentReportUri = ContentUris.withAppendedId(ReportEntry.CONTENT_URI, id);
 
@@ -88,7 +88,11 @@ public class ReportsFragment extends android.support.v4.app.Fragment implements
         String[] projection = {
                 ReportEntry._ID,
                 ReportEntry.COLUMN_REPORT_NAME,
-                ReportEntry.COLUMN_REPORT_DESCRIPTION};
+                ReportEntry.COLUMN_REPORT_TYPE,
+                ReportEntry.COLUMN_REPORT_DATE,
+                ReportEntry.COLUMN_REPORT_DESCRIPTION,
+                ReportEntry.COLUMN_REPORT_LOCATION,
+                ReportEntry.COLUMN_REPORTER_NAME};
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(getActivity(),   // Parent activity context

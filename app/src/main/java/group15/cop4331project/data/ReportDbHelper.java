@@ -35,7 +35,9 @@ public class ReportDbHelper extends SQLiteOpenHelper{
                 + ReportEntry.COLUMN_REPORT_NAME + " TEXT NOT NULL, "
                 + ReportEntry.COLUMN_REPORT_TYPE + " INTEGER NOT NULL, "
                 + ReportEntry.COLUMN_REPORT_DATE + " LONG NOT NULL, "
-                + ReportEntry.COLUMN_REPORT_DESCRIPTION + " TEXT NOT NULL);";
+                + ReportEntry.COLUMN_REPORT_LOCATION + " TEXT NOT NULL, "
+                + ReportEntry.COLUMN_REPORT_DESCRIPTION + " TEXT NOT NULL, "
+                + ReportEntry.COLUMN_REPORTER_NAME + " TEXT NOT NULL);";
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_Reports_TABLE);

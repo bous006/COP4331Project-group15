@@ -39,6 +39,8 @@
     <!-- Label for overview category of attributes in the editor [CHAR LIMIT=30] -->
     <string name="category_description">Description</string>
 
+    <string name="category_location">Location</string>
+
     <!-- Label for overview category of attributes in the editor [CHAR LIMIT=30] -->
     <string name="category_type">Type</string>
 
@@ -52,8 +54,12 @@
     <!-- Text hint for name field in the editor [CHAR LIMIT=30] -->
     <string name="hint_report_name">Name</string>
 
+    <string name="hint_reporter_name">Reporter</string>
+
     <!-- Text hint for breed field in the editor [CHAR LIMIT=30] -->
     <string name="hint_report_description">Description</string>
+
+    <string name="hint_report_location">Location</string>
 
     <!-- Title for the activity to add a new report [CHAR LIMIT=20] -->
     <string name="editor_activity_title_new_report">Add a Report</string>
@@ -131,10 +137,10 @@
 
     <string name="viewer_no_description">Description not found</string>
 
-    <string name="type_general">General</string>
-    <string name="type_assault">Assault</string>
-    <string name="type_theft">Theft</string>
-    <string name="type_vandalism">Vandalism</string>
+    <string name="type_general">Type: General</string>
+    <string name="type_assault">Type: Assault</string>
+    <string name="type_theft">Type: Theft</string>
+    <string name="type_vandalism">Type: Vandalism</string>
     <string name="type_viewer">Viewer</string>
     <string name="type_user">User</string>
     <string name="type_admin">Admin</string>

@@ -8,6 +8,27 @@
     android:padding="@dimen/activity_margin"
     tools:context=".EditReportActivity">
 
+    <!-- User category -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/hint_reporter_name"
+            style="@style/CategoryStyle" />
+
+        <TextView
+            android:id="@+id/edit_reporter_name"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:paddingLeft="6dp"
+            style="@style/CategoryStyle"
+            android:text="User's Name"/>
+    </LinearLayout>
+
     <!-- Overview category -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -97,6 +118,33 @@
                 android:text="@string/date_selected"
                 android:layout_marginLeft="5dp"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Location category -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Label -->
+        <TextView
+            android:text="@string/category_location"
+            style="@style/CategoryStyle" />
+
+        <!-- Input fields -->
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:paddingLeft="4dp"
+            android:orientation="vertical">
+
+            <!-- Description field -->
+            <EditText
+                android:id="@+id/edit_report_location"
+                style="@style/EditorFieldStyle"
+                android:hint="@string/hint_report_location" />
         </LinearLayout>
     </LinearLayout>
 

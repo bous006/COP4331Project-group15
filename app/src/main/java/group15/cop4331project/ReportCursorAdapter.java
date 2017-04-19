@@ -38,27 +38,33 @@ public class ReportCursorAdapter extends CursorAdapter {
         TextView nameTextView = (TextView) view.findViewById(R.id.name);
         TextView typeTextView = (TextView) view.findViewById(R.id.type);
         dateTextView = (TextView) view.findViewById(date);
+        TextView locationTextView = (TextView) view.findViewById(R.id.location);
 
         // Find the columns of report attributes that we're interested in
         int nameColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_NAME);
         int typeColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_TYPE);
-        //int dateColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DATE);
-        int descColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DESCRIPTION);
+        int dateColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DATE);
+        int descriptionColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_DESCRIPTION);
+        int reporterNameColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORTER_NAME);
+        int locationColumnIndex = cursor.getColumnIndex(ReportEntry.COLUMN_REPORT_LOCATION);
 
         // Read the report attributes from the Cursor for the current report
         String reportName = cursor.getString(nameColumnIndex);
-        String reportDesc = cursor.getString(descColumnIndex);
-        /**For some reason dateColumnIndex is returning -1
-        Long reportDate = cursor.getLong(-1);
-        calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(reportDate);
+        String reportDesc = cursor.getString(descriptionColumnIndex);
+        String reportLocation = cursor.getString(5);
+        /*For some reason dateColumnIndex is returning -1*/
+        if (dateColumnIndex != -1) {
+            long reportDate = cursor.getLong(3);
+            calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(reportDate);
 
-        int month = calendar.get(calendar.MONTH)+1;
-        int day = calendar.get(calendar.DAY_OF_MONTH);
-        int year = calendar.get(calendar.YEAR);
-        showDate(year, month, day);*/
+            int month = calendar.get(calendar.MONTH) + 1;
+            int day = calendar.get(calendar.DAY_OF_MONTH);
+            int year = calendar.get(calendar.YEAR);
+            showDate(year, month, day);
+        }
 
-        /**For some reason typeColumnIndex is returning -1 instead of 2 when there is no more data
+        /*For some reason typeColumnIndex is returning -1 instead of 2 when there is no more data
          * so for now I'm hardcoding 2 into here*/
         int reportType = cursor.getInt(2);
         String typeString;
@@ -75,6 +81,7 @@ public class ReportCursorAdapter extends CursorAdapter {
         // Update the TextViews with the attributes for the current report
         nameTextView.setText(reportName);
         typeTextView.setText(typeString);
+        locationTextView.setText(reportLocation);
     }
 
     private void showDate(int year, int month, int day) {
